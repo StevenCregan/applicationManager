@@ -19,32 +19,45 @@ public class applicationManager {
     private static String tempFilePath = "com.stevencregan" + File.separator;
     private static String tempFileName = "appManager.properties";
     private static String tempFileLocation = (File.separator + tempFilePath + tempFileName);
+    private static String[] programArgs;
 
 
     public static void main(String[] args) {
         PipedInputStream inputPipe = new PipedInputStream();
         PipedOutputStream outputPipe = new PipedOutputStream();
-
-        //Create the PID file, check if already running
+        programArgs = args;
+        //Create the PID file, will check if already running first
+        //Will cause exit if already running
         createPIDFile();
 
-        BufferedReader f = new BufferedReader(new InputStreamReader(System.in));
-        while (running) {
-            String x = null;
-            try {
-                x = f.readLine();
-                if (x.equalsIgnoreCase("stop")) {
-                    running = false;
+        try {
+            File appMgrBuffer = new File("/tmp" + File.separator + tempFilePath + "appBuffer");
+            //remove any old command buffer file
+            appMgrBuffer.delete();
+            //appMgrBuffer.createNewFile();
+            RandomAccessFile commandBuffer = new RandomAccessFile(appMgrBuffer, "rw");
+            while (running) {
+                //Wait between checks of file
+                Thread.sleep(2500);
+                if (commandBuffer.length() >= 0) {
+                    StringBuilder cmd = new StringBuilder();
+                    while (commandBuffer.length() > 0 && (commandBuffer.getFilePointer() != commandBuffer.length())) {
+                        cmd.append((char) commandBuffer.read());
+                    }
+                    if (cmd.length() > 0) {
+                        System.out.println(cmd);
+                    }
+                    if ((cmd.toString()).contains("stop")) {
+                        System.out.println("Received Stop");
+                        running = false;
+                    }
+                    /*
+                     * if there's content in the command buffer, read it and act accordingly
+                     */
                 }
-            } catch (IOException e) {
-                e.printStackTrace();
-                running = false;
-            } catch (NullPointerException e) {
-                //do nothing
             }
-            if ((x != null) && (x.length() > 0)) {
-                System.out.println("User Entered: " + x);
-            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
 
         Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
@@ -99,8 +112,7 @@ public class applicationManager {
                     String managerPID = prop.getProperty("managerPID");
                     System.out.println("existing Manager PID: " + managerPID);
                     if (checkAlive(managerPID, appName)) {
-                        System.out.println("Shutting down to avoid duplicate instance");
-                        System.exit(0);
+                        queueCommand();
                     } else {
                         File propFile = new File("/tmp" + tempFileLocation);
                         propFile.delete();
@@ -113,7 +125,6 @@ public class applicationManager {
                     output = new FileOutputStream("/tmp" + tempFileLocation);
                     // set the properties value
                     prop.setProperty("managerPID", pid);
-                    //prop.setProperty("childPID", "testInt");
                     // save properties to project root folder
                     prop.store(output, null);
                     output.close();
@@ -169,5 +180,31 @@ public class applicationManager {
         }
         return result;
     }
-}
 
+
+    /**
+     * Queue up a command based on the command line arguments
+     * This should be done when an instance of applicationManager is already running
+     * Since the running instance is reading the buffer file, we just write to the end of it
+     * The main instance should read and execute from this file
+     */
+    private static void queueCommand() {
+        for (int i = 0; i < programArgs.length; i++) {
+            System.out.println("Arg: " + i + " = " + programArgs[i]);
+        }
+        try {
+            File appMgrBuffer = new File("/tmp" + File.separator + tempFilePath + "appBuffer");
+            //appMgrBuffer.createNewFile();
+            RandomAccessFile commandBuffer = new RandomAccessFile(appMgrBuffer, "rw");
+            commandBuffer.seek(commandBuffer.length());
+            commandBuffer.writeBytes(programArgs[0] + '\n');
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.exit(1);
+        }
+        System.out.println("Placed " + programArgs[0] + " on the appMgrBuffer file");
+        System.out.println("Closing this instance to avoid duplicates");
+        System.exit(0);
+    }
+
+}
