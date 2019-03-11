@@ -1,3 +1,7 @@
+import java.io.*;
+import java.lang.management.ManagementFactory;
+import java.util.Properties;
+
 /**
  * applicationManager
  * Created by Steven Cregan on 2019-03-07.
@@ -5,11 +9,6 @@
  * This should recognize if "child" processes are running already
  * Management of child processes should be possible through IPC
  */
-
-import java.io.*;
-import java.lang.management.ManagementFactory;
-import java.util.Properties;
-
 public class applicationManager {
 
     private static volatile boolean running = true;
