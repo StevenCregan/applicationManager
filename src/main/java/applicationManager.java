@@ -6,8 +6,6 @@
  * Management of child processes should be possible through IPC
  */
 
-import com.sun.istack.internal.NotNull;
-
 import java.io.*;
 import java.lang.management.ManagementFactory;
 import java.util.Properties;
@@ -138,7 +136,7 @@ public class applicationManager {
      * This isn't foolproof, as a PID can be reused
      * Therefore we also check the processName, if it exists
      */
-    private static boolean checkAlive(@NotNull String pid, @NotNull String processName) {
+    private static boolean checkAlive(String pid, String processName) {
         boolean result = false;
         System.out.println("Checking if PID " + pid + " is Alive");
         try {
