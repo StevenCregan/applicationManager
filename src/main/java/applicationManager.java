@@ -16,7 +16,7 @@ public class applicationManager {
     private static volatile boolean changedPID = true;
     private static Properties prop = new Properties();
     private static String appName = "applicationManager";
-    private static String tempFilePath = "com.tradeblazer" + File.separator;
+    private static String tempFilePath = "com.stevencregan" + File.separator;
     private static String tempFileName = "appManager.properties";
     private static String tempFileLocation = (File.separator + tempFilePath + tempFileName);
 
@@ -25,7 +25,7 @@ public class applicationManager {
         PipedInputStream inputPipe = new PipedInputStream();
         PipedOutputStream outputPipe = new PipedOutputStream();
 
-
+        //Create the PID file, check if already running
         createPIDFile();
 
         BufferedReader f = new BufferedReader(new InputStreamReader(System.in));
@@ -123,10 +123,6 @@ public class applicationManager {
             e.printStackTrace();
             running = false;
         }
-
-    }
-
-    private static void writePIDFile(String childPid, String childName) {
 
     }
 
