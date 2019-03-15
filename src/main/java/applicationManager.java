@@ -111,7 +111,6 @@ public class applicationManager implements Runnable {
         return result;
     }
 
-    /* TODO: Change from an executable application to an Interface */
     public void run() {
         PipedInputStream inputPipe = new PipedInputStream();
         PipedOutputStream outputPipe = new PipedOutputStream();
@@ -121,7 +120,6 @@ public class applicationManager implements Runnable {
         //Will cause exit if already running
         createPIDFile();
 
-        /* TODO: Implement an OS compatible version of temp file creation */
         try {
             File appMgrBuffer = new File(tempAppBufferFile);
             //remove any old command buffer file

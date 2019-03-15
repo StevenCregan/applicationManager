@@ -1,6 +1,6 @@
 /**
  * applicationManager Runner
- * Created by steven on 2019-03-15.
+ * Created by Steven Cregan on 2019-03-15.
  * Use this to start/stop the application manager now
  */
 public class runAppManager {
