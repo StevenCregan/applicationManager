@@ -19,3 +19,64 @@ repositories {
 dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.12'
 }
+
+// create a jar process in order to assign a customized classpath
+jar {
+    description 'Create a Jar with just the compiled code from src/main'
+    dependsOn configurations.runtimeClasspath
+    manifest {
+        attributes(
+                'Implementation-Title': rootProject.name,
+                'Implementation-Version': version,
+                'Class-Path': configurations.runtimeClasspath.collect { it.getName() }.join(' '),
+                // Uncomment Main-Class attribute for runnable applications
+                'Main-Class': mainClassName
+        )
+    }
+
+    from sourceSets.main.output
+}
+
+task uberJar(type: Jar) {
+
+    description 'Create a Jar with the compiled code from src/main and all dependencies'
+    appendix = 'uber'
+    dependsOn configurations.runtimeClasspath
+
+    manifest {
+        attributes(
+                'Implementation-Title': rootProject.name,
+                'Implementation-Version': version,
+                'Class-Path': configurations.runtimeClasspath.collect { it.getName() }.join(' '),
+                // Uncomment Main-Class attribute for runnable applications
+                'Main-Class': mainClassName
+        )
+    }
+
+    from sourceSets.main.output
+    from {
+        (configurations.runtimeClasspath - configurations.compileOnly - configurations.testCompileOnly).findAll {
+            it.name.endsWith('jar')
+        }.collect { zipTree(it) }
+    }
+}
+
+task sourcesJar(type: Jar) {
+    description 'Create a Jar with the source code'
+    classifier = 'sources'
+    manifest {
+        attributes(
+                'Implementation-Title': rootProject.name,
+                'Implementation-Version': version,
+                'Class-Path': configurations.runtimeClasspath.collect { it.getName() }.join(' '),
+                // Uncomment Main-Class attribute for runnable applications
+                'Main-Class': mainClassName
+        )
+    }
+    from sourceSets.main.allSource
+}
+
+artifacts {
+    archives uberJar
+    archives sourcesJar
+}
