@@ -200,6 +200,8 @@ public class applicationManager implements Runnable {
                 if (checkAlive(managerPID, parentClassName)) {
                     queueCommand();
                 } else {
+                    // close the FileInputStream to avoid blocking
+                    input.close();
                     File propFile = new File(tempPropFile);
                     propFile.delete();
                     System.out.println("File (" + tempPropFile + ") deleted");
@@ -267,12 +269,12 @@ public class applicationManager implements Runnable {
     }
 
     private void setTempFilePath(String appName, String packageName) {
-        if (System.getProperty("os.name").toLowerCase().contains("Windows")) {
+        if (System.getProperty("os.name").toLowerCase().contains("windows")) {
             System.out.println("Running on Windows");
             if (packageName.isEmpty()) {
-                this.tempFilePath = (System.getProperty("java.io.tmpdir") + File.separator + appName);
+                this.tempFilePath = (System.getProperty("java.io.tmpdir") + appName);
             } else {
-                this.tempFilePath = (System.getProperty("java.io.tmpdir") + File.separator + packageName + File.separator + appName);
+                this.tempFilePath = (System.getProperty("java.io.tmpdir") + packageName + File.separator + appName);
             }
 
         } else if (System.getProperty("os.name").toLowerCase().contains("linux")) {
