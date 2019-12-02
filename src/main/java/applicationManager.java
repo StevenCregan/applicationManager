@@ -139,6 +139,7 @@ public class applicationManager implements Runnable {
                     }
                     if ((cmd.toString()).contains("stop")) {
                         System.out.println("Received Stop");
+                        commandBuffer.close();
                         running = false;
                     }
                     /*
